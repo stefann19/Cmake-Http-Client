@@ -39,7 +39,7 @@ std::string CreateHttpGET(std::string url) {
 std::string CreateHttpPost(httpPacket& packet) {
 	std::string s = "POST /"+ packet.url+" HTTP / 1.1\r\n"+
 					"Host: 127.0.0.1:8080\r\n"+
-					"Connection: keep - alive\r\n"+
+					"Connection: keep-alive\r\n"+
 					"Content-Length: "+std::to_string(packet.length)+"\r\n"+
 					"Accept: text/plain, */*; q=0.01\r\n"+
 					"Origin: http://127.0.0.1:8080\r\n"+
@@ -233,14 +233,23 @@ int main(int argc, char* argv[])
 
 
 		std::vector<std::thread> threadList;
-		for (int i = 0; i < 270; i++)
+		for (int i = 0; i < 100; i++)
 		{
 			threadList.push_back(std::thread([&p,i,&io_service,&endpoint_iterator] () {
 				//std::cout << i << std::endl;
 				p.variables[5] = std::make_pair("nr", std::to_string(i));
 				p.variablesToContent();
 				http_client a(io_service, endpoint_iterator);
+				
 				a.do_write(CreateHttpPost(p));
+				
+				
+				p.variables[5] = std::make_pair("nraa", std::to_string(i));
+				a.do_write(CreateHttpPost(p));
+				
+				a.do_write(CreateHttpGET(""));
+
+
 			}));
 		}
 		// Now wait for all the worker thread to finish i.e.
